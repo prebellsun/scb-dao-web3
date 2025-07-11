@@ -1,10 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+// mydapp/src/main.tsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import { WagmiConfig } from 'wagmi'
+import { wagmiConfig } from './lib/wagmi.config'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <WagmiConfig config={wagmiConfig}>
+      <App />
+    </WagmiConfig>
+  </React.StrictMode>,
 )
+
+
