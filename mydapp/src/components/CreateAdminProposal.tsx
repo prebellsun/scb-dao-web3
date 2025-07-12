@@ -44,4 +44,3 @@ const CreateAdminProposal = () => {
 };
 
 export default CreateAdminProposal;
-
