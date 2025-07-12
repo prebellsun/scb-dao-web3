@@ -1,16 +1,53 @@
+// src/hooks/useDaoInfo.ts
 import { useEffect, useState } from "react";
-import { aragonClient } from "../lib/aragonClient";
+import { useAragonClient } from "./useAragonClient";
 
-export function useDaoInfo() {
-  const [dao, setDao] = useState(null);
+interface DaoInfo {
+  name: string;
+  description?: string;
+  ensDomain?: string;
+  token?: {
+    name: string;
+    symbol: string;
+    totalSupply: string;
+  };
+}
+
+export const useDaoInfo = () => {
+  const { client } = useAragonClient();
+  const [daoInfo, setDaoInfo] = useState<DaoInfo | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchDao() {
-      const result = await aragonClient.methods.getDao("0x4c6D82BF403f1fF8a4c52f6562f8A277e8204081");
-      setDao(result);
-    }
-    fetchDao();
-  }, []);
+    const fetchDaoInfo = async () => {
+      if (!client) return;
 
-  return dao;
-}
+      try {
+        setLoading(true);
+        const dao = await client.methods.dao();
+        setDaoInfo({
+          name: dao.name,
+          description: dao.metadata?.description,
+          ensDomain: dao.ensDomain,
+          token: {
+            name: dao.token.name,
+            symbol: dao.token.symbol,
+            totalSupply: dao.token.totalSupply,
+          },
+        });
+        setError(null);
+      } catch (err: any) {
+        console.error("DAO 정보 가져오기 실패:", err);
+        setError(err.message || "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDaoInfo();
+  }, [client]);
+
+  return { daoInfo, loading, error };
+};
+
