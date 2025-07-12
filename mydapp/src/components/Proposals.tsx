@@ -1,8 +1,8 @@
-// src/components/ProposalList.tsx
+// src/components/Proposals.tsx
 import React from "react";
 import { useProposals } from "../hooks/useProposals";
 
-const ProposalList = () => {
+const Proposals = () => {
   const { proposals, loading, error } = useProposals();
 
   if (loading) return <p>불러오는 중...</p>;
@@ -26,4 +26,4 @@ const ProposalList = () => {
   );
 };
 
-export default ProposalList;
+export default Proposals;
