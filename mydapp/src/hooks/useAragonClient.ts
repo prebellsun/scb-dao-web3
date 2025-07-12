@@ -1,42 +1,26 @@
 // src/hooks/useAragonClient.ts
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Client } from "@aragon/sdk-client";
-import { getWalletClient } from "@wagmi/core";
-import { sepolia } from "viem/chains";
-import { createPublicClient, http } from "viem";
+import { useAccount, useSigner } from "wagmi";
 
+// ✅ 이 훅은 메타마스크 지갑의 signer가 연결된 경우에만 Aragon 클라이언트를 초기화함
 export const useAragonClient = () => {
-  const [client, setClient] = useState<Client | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data: signer } = useSigner();      // 현재 연결된 wallet의 signer
+  const { address } = useAccount();          // 현재 wallet address
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const walletClient = await getWalletClient();
-        if (!walletClient) throw new Error("No wallet client found");
+  // ✅ signer가 준비되었을 때만 Client 생성 (React 성능 최적화)
+  const client = useMemo(() => {
+    if (!signer) return null;
 
-        const publicClient = createPublicClient({
-          chain: sepolia,
-          transport: http(),
-        });
+    return new Client({
+      network: "sepolia",     // 테스트넷 환경 설정
+      signer,                 // 지갑 signer 연결
+    });
+  }, [signer]);
 
-        const aragonClient = new Client({
-          network: sepolia,
-          signer: walletClient,
-          publicClient,
-        });
-
-        setClient(aragonClient);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    init();
-  }, []);
-
-  return { client, loading, error };
+  return { client, address };
 };
+
+// 사용 예:
+// const { client, address } = useAragonClient();
+// client?.methods.proposals().then(...) 이런 식으로 사용 가능
