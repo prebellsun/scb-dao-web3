@@ -1,11 +1,18 @@
-import ProposalList from "./components/ProposalList";
+// mydapp/src/App.tsx
+import { Routes, Route } from 'react-router-dom';
+import ProposalList from './components/ProposalList';
+import ProposalDetail from './components/ProposalDetail';
 
 function App() {
   return (
-    <div className="App">
-      <ProposalList />
-    </div>
+    <Routes>
+      <Route path="/" element={<ProposalList />} />
+      <Route path="/proposal/:id" element={<ProposalDetail />} />
+    </Routes>
   );
 }
+
+export default App;
+
 
 
