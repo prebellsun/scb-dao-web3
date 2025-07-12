@@ -1,12 +1,11 @@
-import ConnectWallet from "./components/ConnectWallet";
+import ProposalList from "./components/ProposalList";
 
 function App() {
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h1>SCB DAO</h1>
-      <ConnectWallet />
+    <div className="App">
+      <ProposalList />
     </div>
   );
 }
 
-export default App;
+
