@@ -1,28 +1,45 @@
-import React from "react";
-import { useDaoInfo } from "../hooks/useDaoInfo";
+// src/pages/DaoInfo.tsx
+import { useEffect, useState } from "react";
+import { useAragonClient } from "../hooks/useAragonClient";
 
 const DaoInfo = () => {
-  const { dao, loading, error } = useDaoInfo();
+  const { client } = useAragonClient();
+  const [dao, setDao] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  if (loading) return <div>Loading DAO Info...</div>;
-  if (error) return <div>Error loading DAO info: {error.message}</div>;
+  useEffect(() => {
+    const fetchDao = async () => {
+      if (!client) return;
+      try {
+        // ✅ dao 정보 조회 시 명시적으로 주소를 넘김
+        const result = await client.methods.getDao("0x4c6D82BF403f1fF8a4c52f6562f8A277e8204081");
+        setDao(result);
+      } catch (err: any) {
+        setError(err.message || "DAO 정보 불러오기 실패");
+        console.error("❌ DAO 정보 불러오기 실패:", err);
+      }
+    };
+
+    fetchDao();
+  }, [client]);
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">DAO 정보</h2>
+    <div style={{ padding: "1rem" }}>
+      <h2>🧠 DAO 정보</h2>
+      {error && <p style={{ color: "red" }}>🚨 오류: {error}</p>}
       {dao ? (
-        <div className="space-y-2">
-          <p><strong>Name:</strong> {dao.name}</p>
-          <p><strong>Address:</strong> {dao.address}</p>
-          <p><strong>Metadata URI:</strong> {dao.metadataUri}</p>
-          <p><strong>Network:</strong> {dao.network}</p>
-        </div>
+        <pre style={{ backgroundColor: "#f4f4f4", padding: "1rem" }}>
+          {JSON.stringify(dao, null, 2)}
+        </pre>
       ) : (
-        <p>DAO 정보를 불러올 수 없습니다.</p>
+        <p>⏳ DAO 정보를 불러오는 중...</p>
       )}
     </div>
   );
 };
 
 export default DaoInfo;
+
+
+
 
