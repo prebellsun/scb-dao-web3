@@ -2,23 +2,33 @@
 
 import { useEffect, useState } from 'react';
 import { useAragonClient } from '../hooks/useAragonClient';
+import { useDaoInfo } from '../hooks/useDaoInfo'; // useDaoInfo 훅 임포트 추가
 import { getTokenVotingClient } from '../utils/getTokenVotingClient';
 
 export default function Proposals() {
-  const { client, dao } = useAragonClient();
+  // 1. 'dao' 속성 접근 오류 해결: useAragonClient에서 dao를 가져오지 않고 client만 사용
+  const { client } = useAragonClient();
+  // useDaoInfo 훅을 사용하여 daoInfo, 로딩, 오류 상태를 가져옴
+  const { daoInfo, loading: daoLoading, error: daoError } = useDaoInfo();
   const [proposals, setProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ client와 dao가 없으면 아예 fetch도 시도하지 않도록 방지
-  const isReady = client && dao;
+  // isReady 조건에 daoInfo와 daoLoading 상태를 포함
+  const isReady = client && daoInfo && !daoLoading;
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady) {
+      setLoading(true); // client 또는 daoInfo가 준비되지 않았거나, dao 정보 로딩 중이면 제안 목록 로딩 상태 유지
+      return;
+    }
 
     const fetchProposals = async () => {
-      console.log('🔍 dao.plugins:', dao.plugins);
+      setLoading(true); // 제안 목록 로딩 시작
 
-      const daoPlugins = dao.plugins ?? [];
+      // 1. 'dao' 속성 접근 오류 해결: daoInfo를 사용하여 plugins에 접근
+      console.log('🔍 daoInfo.plugins:', daoInfo.plugins);
+
+      const daoPlugins = daoInfo.plugins ?? [];
       const tokenVotingPlugin = daoPlugins.find(
         (plugin) => plugin.id === 'token-voting.plugin.dao.eth'
       );
@@ -27,6 +37,7 @@ export default function Proposals() {
 
       if (!tokenVotingPlugin?.instanceAddress) {
         console.warn('❗ TokenVoting plugin instanceAddress 없음');
+        setLoading(false); // 플러그인 없으면 로딩 종료
         return;
       }
 
@@ -34,30 +45,46 @@ export default function Proposals() {
 
       if (!tokenVotingClient) {
         console.warn('❗ tokenVotingClient 생성 실패');
+        setLoading(false); // 클라이언트 생성 실패 시 로딩 종료
         return;
       }
 
       try {
+        // 3. 'pagination' 파라미터 오류 해결: pagination 객체 대신 skip과 limit 사용
         const result = await tokenVotingClient.methods.getProposals({
-          pagination: { limit: 10, offset: 0 },
+          skip: 0,
+          limit: 10,
         });
 
         console.log('✅ 제안 목록:', result);
-        setProposals(result.items ?? []);
+        // 2. 'items' 속성 접근 오류 해결: result 자체가 배열이므로 .items 제거
+        setProposals(result ?? []);
+
       } catch (error) {
         console.error('❌ 제안 불러오기 실패:', error);
+        setProposals([]); // 제안 불러오기 실패 시 proposals를 비움
       } finally {
-        setLoading(false);
+        setLoading(false); // 제안 목록 로딩 종료
       }
     };
 
     fetchProposals();
-  }, [isReady]);
+  }, [isReady, client, daoInfo]); // 의존성 배열에 isReady, client, daoInfo 추가
+
+  // 🚨 DAO 정보 로드 중 오류 발생 시
+  if (daoError) {
+    return <p style={{ color: "red" }}>🚨 DAO 정보 로드 오류: {daoError.message}</p>;
+  }
 
   // 🔄 로딩 중 또는 클라이언트 준비 전이면 메시지 출력
-  if (!isReady || loading) return <p>🔄 불러오는 중...</p>;
+  if (!isReady || loading) {
+    return <p>🔄 불러오는 중...</p>;
+  }
 
-  if (!proposals.length) return <p>📭 제안이 없습니다.</p>;
+  // 📭 제안이 없을 경우
+  if (!proposals.length) {
+    return <p>📭 제안이 없습니다.</p>;
+  }
 
   return (
     <div>
@@ -74,6 +101,17 @@ export default function Proposals() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

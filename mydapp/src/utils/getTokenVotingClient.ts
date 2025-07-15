@@ -1,4 +1,5 @@
 // src/utils/getTokenVotingClient.ts
+
 import { Client, TokenVotingClient, TokenVotingClientParams } from '@aragon/sdk-client';
 
 export const getTokenVotingClient = (
@@ -15,6 +16,9 @@ export const getTokenVotingClient = (
       client,
       pluginAddress: tokenVotingPluginAddress,
     };
+
+    // ✅ 이 줄 바로 아래에 console.log를 추가합니다.
+    console.dir(client); 
 
     const tokenVotingClient = new TokenVotingClient(tokenVotingParams);
     return tokenVotingClient;
