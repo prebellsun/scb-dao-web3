@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ethers } from "ethers";
+// import { ethers } from "ethers"; // ethers 삭제로 인한 제거
 
 function ConnectWallet() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);

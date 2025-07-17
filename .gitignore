@@ -1,2 +1,34 @@
+# node_modules는 의존성이 많고 용량이 커서 제외
 node_modules/
+
+# 환경 변수 파일 (민감 정보 포함)
 .env
+
+# 빌드 출력물
+dist/
+build/
+
+# 로그 파일
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE 설정 파일
+.vscode/
+.idea/
+
+# 운영체제 특유 파일
+.DS_Store
+Thumbs.db
+
+# 기타 캐시
+.cache/
+.next/
+out/
+*.local
+
+# 잠금 파일 (옵션)
+package-lock.json
+yarn.lock
+
