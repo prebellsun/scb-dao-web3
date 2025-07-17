@@ -40,10 +40,7 @@ export const useAragonClient = () => {
         web3Providers: [ethersProvider], 
         // ✅ IPFS 노드 URL을 Vite 프록시를 통하도록 변경합니다.
         ipfsNodes: [
-           //{ url: 'https://localhost:5173/ipfs-proxy-cloudflare', headers: {} },
-          // { url: 'https://localhost:5173/ipfs-proxy-dweb', headers: {} },
-          // { url: 'https://localhost:5173/ipfs-proxy-ipfsio', headers: {} },
-          { url: 'https://localhost:5173/ipfs-proxy-pinata', headers: {} },
+          { url: 'https://localhost:5173/ipfs-proxy-ipfsio', headers: {} },
         ],
       };
 
