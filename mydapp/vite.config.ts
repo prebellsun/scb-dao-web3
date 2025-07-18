@@ -57,9 +57,9 @@ export default defineConfig({
     },
   },
   server: {
-    // ✅ 가장 중요한 수정: 이 'https: true' 라인을 제거합니다.
-    // https: true, 
+    // ✅ 'https: true' 라인은 제거됨
     proxy: {
+      // ✅ Pinata 프록시
       '/ipfs-proxy-pinata': {
         target: 'https://gateway.pinata.cloud',
         changeOrigin: true,
@@ -67,10 +67,19 @@ export default defineConfig({
         secure: true,
         followRedirects: true,
         headers: {
-          'Authorization': `Bearer ${process.env.VITE_PINATA_JWT}` 
+          'Authorization': `Bearer ${process.env.VITE_PINATA_JWT}`
         },
+      },
+
+      // ✅ 로컬 IPFS 노드 프록시
+      '/local-ipfs-proxy': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/local-ipfs-proxy', '/api/v0'),
+        secure: false,
       },
     }
   }
 });
+
 
